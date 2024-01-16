@@ -8,20 +8,29 @@
 #include <algorithm>
 
 using namespace std;
-int globalcounter = 0;
 
-void zamena(vector<vector<char>>& promvector, vector<vector<char>>& vectorresult, int stroka, int promi, int promj, int n) {
+int global_counter = 0;
+
+void replacement(vector<vector<char>>& prom_vector, 
+					vector<vector<char>>& vector_result, 
+					int line, 
+					int prom_i,
+					int prom_j,
+					int n) {
 
 	for (int j = 0; j < n; j++) {
-		if (j == promj) {
-			vectorresult[stroka][j] = '*';
+		if (j == prom_j) {
+			vector_result[line][j] = '*';
 		}
-		else vectorresult[stroka][j] = promvector[promi][j];
+		else vector_result[line][j] = prom_vector[prom_i][j];
 	}
 
 }
 
-void delstrings(set<int>& set, vector<vector<char>>& promvector, vector<vector<char>>& revect, int n) {
+void deleteStrings(set<int>& set,
+					vector<vector<char>>& promvector,
+					vector<vector<char>>& revect, 
+					int n) {
 
 	int i = 0;
 	for (auto it = set.begin(); it != set.end(); ++it) {
@@ -37,8 +46,6 @@ void delstrings(set<int>& set, vector<vector<char>>& promvector, vector<vector<c
 	revect.clear();
 }
 
-
-
 void deleteDuplicates(vector<vector<char>>& promvector, int n) {
 	for (int i = 0; i < promvector.size(); i++) {
 
@@ -52,95 +59,110 @@ void deleteDuplicates(vector<vector<char>>& promvector, int n) {
 	}
 }
 
-void merg(vector<vector<char>>& constituent, vector<int>& vec, vector<vector<char>>& implicants, int n) {
-	int recursecounter = 0;
-	vector<vector<char>>promvector = constituent;
+void mergeConstituents(vector<vector<char>>& constituent, 
+						vector<int>& vec,
+						vector<vector<char>>& implicants, 
+						int n) {
+	int line = 0;
+	int counter_of_recurse = 0;
+	vector<vector<char>>prom_vector = constituent;
+	vector<vector<char>>vector_result;
 	set<int>set;
-	vector<vector<char>>vectorresult;
-	vectorresult.resize(vec.size() * 3, vector<char>(n));
-	int stroka = 0;
+
+	vector_result.resize(vec.size() * 3, vector<char>(n));
+	
 
 	for (int i = 0; i < constituent.size(); i++) {
 		for (int k = i + 1; k < constituent.size(); k++) {
 
-			int counter1 = 0;
-			int promi = 0;
-			int promj = 0;
-			int cx = 0;
-			if (globalcounter == 0) {
+			int counter = 0;
+			int prom_i = 0;
+			int prom_j = 0;
+			int column_counter = 0;
+
+			if (global_counter == 0) {
 				for (int j = 0; j < n; j++) {
-					if (promvector[i][j] != promvector[k][j]) // ПРОХОД 1 РАЗ
+					if (prom_vector[i][j] != prom_vector[k][j])
 					{
-						counter1++;
-						promi = i;
-						promj = j;
+						counter++;
+						prom_i = i;
+						prom_j = j;
 					}
 				}
 			}
 			else
 				for (int d = 0; d < n; d++) {
-					if (promvector[k][d] == '*') {
-						cx = d;
+					if (prom_vector[k][d] == '*') {
+						column_counter = d;
 						break;
 					}
 				}
-			if (promvector[i][cx] == '*' && promvector[i][cx] == promvector[k][cx]) { //ПРОХОД 2 раз
+
+			if (prom_vector[i][column_counter] == '*' && prom_vector[i][column_counter] == prom_vector[k][column_counter]) {
 				int a = 0;
 				while (a < n) {
-					if (promvector[i][a] != promvector[k][a])
+					if (prom_vector[i][a] != prom_vector[k][a])
 					{
-						counter1++;
-						promi = i;
-						promj = a;
+						counter++;
+						prom_i = i;
+						prom_j = a;
 					}
 					a++;
 				}
 			}
-			if (counter1 == 1) {
+
+			if (counter == 1) {
 				set.insert(i);
 				set.insert(k);
-				recursecounter++;
-				zamena(promvector, vectorresult, stroka, promi, promj, n);
-				stroka++;
+				counter_of_recurse++;
+				replacement(prom_vector, vector_result, line, prom_i, prom_j, n);
+				line++;
 			}
 		}
 	}
 
 	vector<vector<char>>revect;
-	if (recursecounter != 0) {
-		delstrings(set, promvector, revect, n);
+
+	if (counter_of_recurse != 0) {
+		deleteStrings(set, prom_vector, revect, n);
 		int j = 0;
-		for (int i = 0; i < vectorresult.size(); i++) {
-			if (vectorresult[i][j] != '\0')promvector.push_back(vectorresult[i]);
+		for (int i = 0; i < vector_result.size(); i++) {
+			if (vector_result[i][j] != '\0')prom_vector.push_back(vector_result[i]);
 		}
 
 		int frequence = 3;
 		for (int i = 0; i < frequence; i++) {
-			deleteDuplicates(promvector, n);
+			deleteDuplicates(prom_vector, n);
 		}
 
-		cout << "Результат склеивания: " << endl;
+		cout << "Результат 'склеивания' "<< global_counter + 1<< " проход: " << endl;
 
-		for (int i = 0; i < promvector.size(); i++) {
+		for (int i = 0; i < prom_vector.size(); i++) {
 			for (int j = 0; j < n; j++) {
-				cout << promvector[i][j];
+				cout << prom_vector[i][j];
 			}
 			cout << '\n';
 		}
 		cout << endl;
 	}
-	if (recursecounter != 0) {
-		globalcounter++;
-		merg(promvector, vec, implicants, n);
+
+	if (counter_of_recurse != 0) {
+		global_counter++;
+		mergeConstituents(prom_vector, vec, implicants, n);
 	}
-	else implicants = promvector;
+	else {
+		implicants = prom_vector;
+	}
 
 }
 
+void makeImplicance(vector<vector<char>>& implicants,
+					vector<vector<char>>& constituent, 
+					vector<vector<char>>& implicantmatrix, 
+					int n, 
+					vector<int>& pluses_in_string) {
 
-void makeImplicance(vector<vector<char>>& implicants, vector<vector<char>>& constituent, vector<vector<char>>& implicantmatrix, int n, vector<int>& plusesinString) {
-
-	plusesinString.resize(implicants.size());
+	pluses_in_string.resize(implicants.size());
 	for (int i = 0; i < implicants.size(); i++) {
 		for (int k = 0; k < constituent.size(); k++) {
 			int counter = 0;
@@ -151,14 +173,19 @@ void makeImplicance(vector<vector<char>>& implicants, vector<vector<char>>& cons
 			if (counter > 0) implicantmatrix[i][k] = '-';
 			else {
 				implicantmatrix[i][k] = '+';
-				plusesinString[i] += 1;
+				pluses_in_string[i] += 1;
 			}
 		}
 	}
 }
 
-void outputMatrix(vector<vector<char>>& implicants, vector<vector<char>>& constituent, vector<vector<char>>& implicantmatrix, int n) {
-	cout << "       ";
+void outputMatrix(vector<vector<char>>& implicants, 
+				  vector<vector<char>>& constituent, 
+				  vector<vector<char>>& implicant_matrix, 
+				  int n) {
+
+	cout << "			Импликантная матрица			" << endl << endl;
+	cout << "      ";
 	for (int i = 0; i < constituent.size(); i++) {
 		for (int j = 0; j < n; j++) {
 			cout << constituent[i][j];
@@ -167,15 +194,15 @@ void outputMatrix(vector<vector<char>>& implicants, vector<vector<char>>& consti
 	}
 	cout << endl;
 	for (int i = 0; i < implicants.size(); i++) {
-		int mergedvectorCounter = 0;
+		int merged_vector_counter = 0;
 		int k = 0;
-		while (mergedvectorCounter < n) {
-			cout << implicants[i][mergedvectorCounter];
-			mergedvectorCounter++;
+		while (merged_vector_counter < n) {
+			cout << implicants[i][merged_vector_counter];
+			merged_vector_counter++;
 		}
 		cout << "    ";
 		while (k < constituent.size()) {
-			cout << implicantmatrix[i][k];
+			cout << implicant_matrix[i][k];
 			cout << "      ";
 			k++;
 		}
@@ -184,7 +211,11 @@ void outputMatrix(vector<vector<char>>& implicants, vector<vector<char>>& consti
 	cout << endl;
 }
 
-void makeKNF(vector<vector<char>>& constituents, vector<vector<char>>& implicantmatrix, vector<char>& KNF, int n) {
+
+void makeKNF(vector<vector<char>>& constituents, 
+			 vector<vector<char>>& implicantmatrix, 
+			 vector<char>& KNF, 
+			 int n) {
 
 	for (int j = 0; j < constituents.size(); j++) {
 		int plusCounter = 0;
@@ -212,12 +243,16 @@ void makeKNF(vector<vector<char>>& constituents, vector<vector<char>>& implicant
 	cout << endl;
 }
 
-void outDNF(vector<vector<char>>& implicants, vector<vector<char>>& implicantmatrix, int n, vector<int>&strNumbers) {
+void outDNF(vector<vector<char>>& implicants,
+			vector<vector<char>>& implicantmatrix,
+			int n,
+			vector<int>&strNumbers) {
+
 	vector<char> resul;
 	for (int i = 0; i < strNumbers.size(); i++) {
 		for (int j = 0; j < n; j++) {
 			if (implicants[strNumbers[i]][j] == '0') {
-				resul.push_back('^');
+				resul.push_back('!');
 				resul.push_back('X');
 				resul.push_back(j + '1');
 			}
@@ -234,39 +269,44 @@ void outDNF(vector<vector<char>>& implicants, vector<vector<char>>& implicantmat
 	cout << endl;
  }
 
-void sorting(string& resProm) {
-	sort(resProm.begin(), resProm.end());
-	for (int i = 0; i < resProm.length() - 1; i++) {
-		if (resProm[i] == resProm[i + 1]) resProm.erase(resProm.begin() + i + 1);
+void sorting(string& prom_result) {
+	
+	sort(prom_result.begin(), prom_result.end());
+
+	for (int i = 0; i < prom_result.length() - 1; i++) {
+		if (prom_result[i] == prom_result[i + 1]) {
+			prom_result.erase(prom_result.begin() + i + 1);
+		}
 	}
 }
 
-void multiply(vector<string>& strif) { /// ПЕРЕМНОЖЕНИЕ  a+bc и d+ce
-	for (int i = 0; i < strif.size(); i++) {
-		for (int k = i + 1; k < strif.size(); k++) {
-			if (strif[i] != "9" && strif[k] != "9") {
+// ПЕРЕМНОЖЕНИЕ  импликант
+void multiply(vector<string>& terms) { 
+	for (int i = 0; i < terms.size(); i++) {
+		for (int k = i + 1; k < terms.size(); k++) {
+			if (terms[i] != "9" && terms[k] != "9") {
 				string out;
-				string one = strif[i];
-				string two = strif[k];
+				string one = terms[i];
+				string two = terms[k];
 				set<string>sett;
 				char prom;
-				for (int onei = 0; onei < one.size(); onei++) { // умножаю a+bc и d+ce
-					string resProm;
-					string oneProm;
-					while (one[onei] != '+' && one[onei] != one[one.length()]) {
-						oneProm.push_back(one[onei]);
-						onei++;
+				for (int one_i = 0; one_i < one.size(); one_i++) { 
+					string res_prom;
+					string one_prom;
+					while (one[one_i] != '+' && one[one_i] != one[one.length()]) {
+						one_prom.push_back(one[one_i]);
+						one_i++;
 					}
-					for (int twoi = 0; twoi < two.size(); twoi++) {
-						string twoProm;
-						while (two[twoi] != '+' && two[twoi] != two[two.length()]) {
-							twoProm.push_back(two[twoi]);
-							twoi++;
+					for (int two_i = 0; two_i < two.size(); two_i++) {
+						string two_prom;
+						while (two[two_i] != '+' && two[two_i] != two[two.length()]) {
+							two_prom.push_back(two[two_i]);
+							two_i++;
 						}
-						if (oneProm != twoProm) {
-							resProm = oneProm + twoProm; // ad или bce
-							sorting(resProm);
-							sett.insert(resProm);
+						if (one_prom != two_prom) {
+							res_prom = one_prom + two_prom; 
+							sorting(res_prom);
+							sett.insert(res_prom);
 						}
 					}
 				}
@@ -275,14 +315,19 @@ void multiply(vector<string>& strif) { /// ПЕРЕМНОЖЕНИЕ  a+bc и d+ce
 					out.push_back('+');
 				}
 				out.pop_back();
-				strif[i] = out;
-				strif[k] = "9";
+				terms[i] = out;
+				terms[k] = "9";
 			}
 			i++;
 		}
 	}
-	strif.erase(remove_if(strif.begin(), strif.end(), [](const string& str) {return str == "9"; }), strif.end());
-	if (strif.size() != 1) multiply(strif);
+	terms.erase(remove_if(terms.begin(), 
+							terms.end(),
+							[](const string& str) {
+								return str == "9"; 
+							}),
+							terms.end());
+	if (terms.size() != 1) multiply(terms);
 }
 
 int isCorrect(string& one, string& two, char& prom) {
@@ -300,10 +345,13 @@ int isCorrect(string& one, string& two, char& prom) {
 }
 
 void reducing(vector<string>& strif, bool& flag) {
+
 	for (int i = 0; i < strif.size(); i++) {
 		for (int k = i + 1; k < strif.size(); k++) {
+
 			string one = strif[i];
 			string two = strif[k];
+
 			if (one == "9" || two == "9") continue;
 
 			if (one == two) {
@@ -320,16 +368,23 @@ void reducing(vector<string>& strif, bool& flag) {
 				if (counter == 1) strif[k] = '9';
 			}
 
-			if (one.length() == two.length()) {  //случай a+b и a+c
+			if (one.length() == two.length()) { 
+				
 				string str;
 				char prom;
+
 				if (isCorrect(one, two, prom))
 				{
 					str.push_back(prom);
 					str.push_back('+');
+
 					for (int iter = 0; iter < one.length(); iter++) {
-						if (one[iter] != prom && one[iter] != '+') str.push_back(one[iter]);
-						if (two[iter] != prom && two[iter] != '+') str.push_back(two[iter]);
+						if (one[iter] != prom && one[iter] != '+') {
+							str.push_back(one[iter]);
+						}
+						if (two[iter] != prom && two[iter] != '+') {
+							str.push_back(two[iter]);
+						}
 					}
 					strif[i] = str;
 					i++;
@@ -340,14 +395,25 @@ void reducing(vector<string>& strif, bool& flag) {
 		}
 	}
 
-	strif.erase(remove_if(strif.begin(), strif.end(), [](const string& str) {return str == "9"; }), strif.end());
-	int spcou = 0;
+	strif.erase(remove_if(strif.begin(), 
+						  strif.end(),
+						  [](const string& str) {
+							return str == "9";
+						  } ),
+						  strif.end());
+
+	int counter = 0;
 	for (int i = 0; i < strif.size(); i++) {
-		string st = strif[i];
-		if (st.length() > 1) spcou++;
+		string stroka = strif[i];
+		if (stroka.length() > 1) counter++;
 	}
-	if (spcou >= 1)multiply(strif); // рекурсиво вызываю фунцию, если длина массива не равна 1 (в 1 ячейке: ab+bcd...)
-	if (spcou == 0) flag = false;
+	if (counter >= 1) {
+		multiply(strif); // рекурсиво вызываю фунцию, если длина массива не равна 1 (в 1 ячейке: ab+bcd...)
+	}
+
+	if (counter == 0) {
+		flag = false;
+	}
 
 }
 
@@ -377,6 +443,7 @@ int findMinimal(vector<string>& strif, vector<string>& vec) {
 	return min;
 }
 
+
 void findMDNF(vector<string>& strif, vector<string>& MDNF) {
 	vector<string>vec;
 	int min = findMinimal(strif, vec);
@@ -387,8 +454,9 @@ void findMDNF(vector<string>& strif, vector<string>& MDNF) {
 
 }
 
-
-void simplExplression(vector<char>& resul, int size, string& answer) {  // для корректировки вектора с уравнением
+void simplExplression(vector<char>& resul, 
+						int size, 
+						string& answer) {  // для корректировки вектора с уравнением
 	vector<string>strif;
 	strif.resize(resul.size());
 	int iCounter = 0;
@@ -416,7 +484,11 @@ void simplExplression(vector<char>& resul, int size, string& answer) {  // для к
 			continue;
 		}
 	}
-	strif.erase(remove_if(strif.begin(), strif.end(), [](const string& str) {return str.empty(); }), strif.end()); //удаление пустых строк
+	strif.erase(remove_if(strif.begin(), 
+							strif.end(),
+							[](const string& str) 
+							{return str.empty(); } ),
+							strif.end());
 
 	for (int i = 0; i < strif.size(); i++) {
 		for (int k = i + 1; k < strif.size(); k++) {
@@ -430,11 +502,11 @@ void simplExplression(vector<char>& resul, int size, string& answer) {  // для к
 	bool flag = true;
 	
 	reducing(strif, flag);
+
 	if (flag) {
 		findMDNF(strif, MDNF);
 		output = MDNF;
-		cout << strif <<" = ";
-		//cout << " = ";
+
 		for (int i = 0; i < output.size(); i++) {
 			string prom = output[i];
 			answer.append(prom);
@@ -452,7 +524,7 @@ int main() {
 	setlocale(LC_ALL, "rus");
 	char ch;
 	int num = 0;
-	cout << "Введите номера единичных наборов" << endl;
+	cout << "Введите номера единичных наборов (через пробел)" << endl;
 	vector<int>vec;
 
 	while (true) {
@@ -504,7 +576,7 @@ int main() {
 	}
 	vector<vector<char>>implicants;
 	cout << endl;
-	merg(constituent, vec, implicants, n);
+	mergeConstituents(constituent, vec, implicants, n);
 
 	vector<vector<char>>implicantmatrix;
 	implicantmatrix.resize(implicants.size(), vector<char>(constituent.size()));
@@ -521,8 +593,7 @@ int main() {
 	simplExplression(KNF, size, answer);
 
 
-	//ВЫВОД 
-	cout << "K = ";
+	cout << "КНФ = ";
 	for (int i = 0; i < KNF.size(); i++) {
 		cout << KNF[i];
 	}
@@ -541,6 +612,5 @@ int main() {
 			strNumbers.clear();
 		}
 	}
-
 }
 
