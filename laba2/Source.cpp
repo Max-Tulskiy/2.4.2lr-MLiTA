@@ -27,10 +27,10 @@ void replacement(vector<vector<char>>& prom_vector,
 
 }
 
-void deleteStrings(set<int>& set,
-					vector<vector<char>>& promvector,
-					vector<vector<char>>& revect, 
-					int n) {
+void deleteStrings(set<int>& set, 
+				   vector<vector<char>>& promvector,
+				   vector<vector<char>>& revect, 
+				   int n) {
 
 	int i = 0;
 	for (auto it = set.begin(); it != set.end(); ++it) {
@@ -98,7 +98,9 @@ void mergeConstituents(vector<vector<char>>& constituent,
 					}
 				}
 
-			if (prom_vector[i][column_counter] == '*' && prom_vector[i][column_counter] == prom_vector[k][column_counter]) {
+			if (prom_vector[i][column_counter] == '*' && 
+					prom_vector[i][column_counter] == prom_vector[k][column_counter]) {
+
 				int a = 0;
 				while (a < n) {
 					if (prom_vector[i][a] != prom_vector[k][a])
@@ -127,7 +129,7 @@ void mergeConstituents(vector<vector<char>>& constituent,
 		deleteStrings(set, prom_vector, revect, n);
 		int j = 0;
 		for (int i = 0; i < vector_result.size(); i++) {
-			if (vector_result[i][j] != '\0')prom_vector.push_back(vector_result[i]);
+			if (vector_result[i][j] != '\0') prom_vector.push_back(vector_result[i]);
 		}
 
 		int frequence = 3;
@@ -135,7 +137,7 @@ void mergeConstituents(vector<vector<char>>& constituent,
 			deleteDuplicates(prom_vector, n);
 		}
 
-		cout << "Результат 'склеивания' "<< global_counter + 1<< " проход: " << endl;
+		cout << "Result of 'merge' "<< global_counter + 1<< " pass: " << endl;
 
 		for (int i = 0; i < prom_vector.size(); i++) {
 			for (int j = 0; j < n; j++) {
@@ -184,7 +186,7 @@ void outputMatrix(vector<vector<char>>& implicants,
 				  vector<vector<char>>& implicant_matrix, 
 				  int n) {
 
-	cout << "			Импликантная матрица			" << endl << endl;
+	cout << "			Implicant matrix			" << endl << endl;
 	cout << "      ";
 	for (int i = 0; i < constituent.size(); i++) {
 		for (int j = 0; j < n; j++) {
@@ -280,7 +282,7 @@ void sorting(string& prom_result) {
 	}
 }
 
-// ПЕРЕМНОЖЕНИЕ  импликант
+// implicants multiplication 
 void multiply(vector<string>& terms) { 
 	for (int i = 0; i < terms.size(); i++) {
 		for (int k = i + 1; k < terms.size(); k++) {
@@ -321,13 +323,12 @@ void multiply(vector<string>& terms) {
 			i++;
 		}
 	}
-	terms.erase(remove_if(terms.begin(), 
-							terms.end(),
-							[](const string& str) {
-								return str == "9"; 
-							}),
-							terms.end());
-	if (terms.size() != 1) multiply(terms);
+
+	terms.erase(remove_if(terms.begin(), terms.end(), [](const string& str) { return str == "9"; }), terms.end());
+	
+	if (terms.size() != 1) {
+		multiply(terms);
+	}
 }
 
 int isCorrect(string& one, string& two, char& prom) {
@@ -395,12 +396,7 @@ void reducing(vector<string>& strif, bool& flag) {
 		}
 	}
 
-	strif.erase(remove_if(strif.begin(), 
-						  strif.end(),
-						  [](const string& str) {
-							return str == "9";
-						  } ),
-						  strif.end());
+	strif.erase(remove_if(strif.begin(), strif.end(), [](const string& str) { return str == "9"; } ), strif.end());
 
 	int counter = 0;
 	for (int i = 0; i < strif.size(); i++) {
@@ -408,7 +404,7 @@ void reducing(vector<string>& strif, bool& flag) {
 		if (stroka.length() > 1) counter++;
 	}
 	if (counter >= 1) {
-		multiply(strif); // рекурсиво вызываю фунцию, если длина массива не равна 1 (в 1 ячейке: ab+bcd...)
+		multiply(strif); 
 	}
 
 	if (counter == 0) {
@@ -454,19 +450,18 @@ void findMDNF(vector<string>& strif, vector<string>& MDNF) {
 
 }
 
-void simplExplression(vector<char>& resul, 
-						int size, 
-						string& answer) {  // для корректировки вектора с уравнением
+void simplExplression(vector<char>& result, int size, string& answer) {  
+
 	vector<string>strif;
-	strif.resize(resul.size());
+	strif.resize(result.size());
 	int iCounter = 0;
 
-	for (int i = 0; i < resul.size(); i++) {
-		if (resul[i] == '(') {
+	for (int i = 0; i < result.size(); i++) {
+		if (result[i] == '(') {
 			int promi = i + 1;
 			string str;
-			while (resul[promi] != ')') {
-				str.push_back(resul[promi]);
+			while (result[promi] != ')') {
+				str.push_back(result[promi]);
 				promi++;
 			}
 			strif[iCounter] = str;
@@ -475,26 +470,22 @@ void simplExplression(vector<char>& resul,
 			continue;
 		}
 
-		if (resul[i] == '*') continue;
+		if (result[i] == '*') continue;
 		else {
 			string str;
-			str.push_back(resul[i]);
+			str.push_back(result[i]);
 			strif[iCounter] = str;
 			iCounter++;
 			continue;
 		}
 	}
-	strif.erase(remove_if(strif.begin(), 
-							strif.end(),
-							[](const string& str) 
-							{return str.empty(); } ),
-							strif.end());
+	strif.erase(remove_if(strif.begin(), strif.end(), [](const string& str) {return str.empty(); } ), strif.end());
 
 	for (int i = 0; i < strif.size(); i++) {
 		for (int k = i + 1; k < strif.size(); k++) {
 			string one = strif[i];
 			string two = strif[k];
-			if (one.length() > two.length() && !two.empty())swap(strif[i], strif[k]);   // сортировка по возрастанию переменных
+			if (one.length() > two.length() && !two.empty())swap(strif[i], strif[k]); 
 		}
 	}
 	vector<string> MDNF;
@@ -524,7 +515,7 @@ int main() {
 	setlocale(LC_ALL, "rus");
 	char ch;
 	int num = 0;
-	cout << "Введите номера единичных наборов (через пробел)" << endl;
+	cout << "Enter the row numbers of the truth table (separated by space)." << endl;
 	vector<int>vec;
 
 	while (true) {
@@ -578,38 +569,36 @@ int main() {
 	cout << endl;
 	mergeConstituents(constituent, vec, implicants, n);
 
-	vector<vector<char>>implicantmatrix;
-	implicantmatrix.resize(implicants.size(), vector<char>(constituent.size()));
+	vector<vector<char>>implicant_matrix;
+	implicant_matrix.resize(implicants.size(), vector<char>(constituent.size()));
 
-	vector<int>plusesinString;
-	makeImplicance(implicants, constituent, implicantmatrix, n, plusesinString);
+	vector<int>pluses_in_string;
+	makeImplicance(implicants, constituent, implicant_matrix, n, pluses_in_string);
 	
 	vector<char>KNF;
-	outputMatrix(implicants, constituent, implicantmatrix, n); 
-	makeKNF(constituent, implicantmatrix, KNF, n);
+	outputMatrix(implicants, constituent, implicant_matrix, n); 
+	makeKNF(constituent, implicant_matrix, KNF, n);
 	
 	int size = implicants.size();
 	string answer;
 	simplExplression(KNF, size, answer);
 
-
-	cout << "КНФ = ";
+	cout << "K = ";
 	for (int i = 0; i < KNF.size(); i++) {
 		cout << KNF[i];
 	}
 	cout << " = " << answer << endl << endl;
-
 	
-	vector<int> strNumbers;
+	vector<int> string_numbers;
 	for (int i = 0; i < answer.length(); i++) {
 		if ('a' < answer[i] < 'z') {
 			while (answer[i] != '+' && i != answer.length()) {
-				strNumbers.push_back(answer[i] - 'a');
+				string_numbers.push_back(answer[i] - 'a');
 				i++;
 			}
 			cout << "Fmin: ";
-			outDNF(implicants, implicantmatrix, n, strNumbers);
-			strNumbers.clear();
+			outDNF(implicants, implicant_matrix, n, string_numbers);
+			string_numbers.clear();
 		}
 	}
 }
